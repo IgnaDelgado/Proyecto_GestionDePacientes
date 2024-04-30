@@ -4,7 +4,6 @@
 
 using namespace std;
 
-
 // Definicion de la clase Pila utilizando templates para ser generica
 template<typename T>
 class Pila {
@@ -43,16 +42,16 @@ public:
         delete temp; // Libera la memoria del nodo eliminado
         return dato;
     }
-
+    //funcion que retorna la cima de la pila
     T peek() {
-		if (cima == nullptr) {
+		if (cima == nullptr) {//verifica que la pila no este vacia
 			throw out_of_range("Intento de peek en pila vacia");
 		}
-        return cima->dato;
+        return cima->dato;//devuelve el dato cima
 
     }
 
-    // Metodo para verificar si la pila est? vac?a
+    // Metodo para verificar si la pila esta vac?a
     bool estaVacia() const {
         return cima == nullptr;
     }
@@ -61,23 +60,24 @@ public:
     Pila<T> copiar() const {
         Pila<T> pilaCopia;
         Nodo* actual = cima;
-        while (actual != nullptr) {
+        while (actual != nullptr) {//copia todos los datos de la pila actual en la pila copia 
             pilaCopia.push(actual->dato);
             actual = actual->siguiente;
         }
-        return pilaCopia;
+        return pilaCopia;//retorna la copia de la pila original
     }
 };
 
 // Definicion de la estructura Paciente
 struct Paciente
 {
+	//Atributos de la estructura Paciente
     char nombre[50];
     char apellido[50];
     int DNI = 0;
     int edad = 0;
     int Genero = 0;
-    Pila<int> Doctor;
+    Pila<int> Doctor;//se usan 2 pilas para poder almacenar varias consultas
     Pila<string> historial;
 };
 
@@ -85,7 +85,7 @@ struct Paciente
 template<typename T>
 class Lista {
 private:
-    // Definici?n interna de un nodo de la lista.
+    // Definicion interna de un nodo de la lista.
     struct Nodo {
         T dato;         // El dato almacenado en el nodo.
         Nodo* siguiente; // Puntero al siguiente nodo en la lista.
@@ -101,7 +101,7 @@ public:
     Lista() : cabeza(nullptr) {}
 
     // Metodo para eliminar un paciente de la lista de verificacion
-    void eliminarPaciente(int dniPaciente) {
+    void eliminardni(int dniPaciente) {
         Nodo* actual = cabeza;
         Nodo* anterior = nullptr;
 
@@ -135,30 +135,48 @@ public:
 
     // Metodo para verificar si un paciente se encuentra en espera
     bool verificarPaciente(int documento) {
+
         //Puntero a primer nodo de la lista
         Nodo* punteroVerif = cabeza;
+
         while (punteroVerif != nullptr) {
             //Recorre la lista verificando que documento no se encuentre en la lista
             if (punteroVerif->dato == documento)
             {
-                return true;
+                return true;//si lo encuntra devuelve true
             }
             punteroVerif = punteroVerif->siguiente;
         }
         return false;
     }
 
-    // Metodo para buscar el indice de un paciente por su DNI
+    // Metodo bool para buscar un paciente por su DNI en una lista de paciente
     bool buscarDNI(int dniPaciente) {
         Nodo* actual = cabeza;
         while (actual != nullptr) {
-            // Si encuentra el paciente con el DNI dado, devuelve su índice
+
+            // Si encuentra el paciente con el DNI dado, devuelve true 
             if (actual->dato.DNI == dniPaciente) {
                 return true;
             }
             actual = actual->siguiente;
         }
-        // Si no se encuentra el DNI en la lista, devuelve -1
+        // Si no se encuentra el DNI en la lista, devuelve false 
+        return false;
+    }
+    
+    // Metodo bool para buscar un paciente por su DNI en lista de tipo int
+    bool buscarDNI2(int dniPaciente){
+        Nodo* actual = cabeza;
+        while (actual != nullptr) {
+
+            // Si encuentra el paciente con el DNI dado, devuelve true
+            if (actual->dato == dniPaciente) {
+                return true;
+            }
+            actual = actual->siguiente;
+        }
+        // Si no se encuentra el DNI en la lista, devuelve false 
         return false;
     }
 
@@ -167,16 +185,20 @@ public:
         //Puntero a primer nodo de la lista
         Nodo* punteroVerif = cabeza;
         while (punteroVerif != nullptr) {
-            //Recorre la lista verificando que documento no se encuentre en la lista
+
+            // Recorre la lista verificando que documento sea igual al documento 
+            // de un paciente de la lista
             if (punteroVerif->dato.DNI == dniPaciente)
             {
+				// Si lo encuntra, devuelve el paciente
                 return punteroVerif->dato;
             }
             punteroVerif = punteroVerif->siguiente;
         }
-        throw std::runtime_error("Paciente no encontrado"); // Lanza una excepción si el paciente no se encuentra
+        throw std::runtime_error("Paciente no encontrado"); // Si no lo encuntra, Lanza una excepción si el paciente no se encuentra
     }
 
+	// Metodo para verificar si la lista esta vacia
     bool estaVacia() {
         if(cabeza == nullptr) {
             return true;
@@ -184,71 +206,96 @@ public:
         return false;
     }
 
+	// Metodo para mostrar la lista de pacientes
     void mostrarLista() {
-        Nodo* punteroTemp = cabeza; // Falta el punto y coma al final de la línea
+        //Puntero a primer nodo de la lista
+        Nodo* punteroTemp = cabeza; 
 
+        cout << "Lista de pacientes del dia : " << endl;
+        // Se crea una lista int para almacenar los dni de los 
+		// pacientes para no mostrar pacientes repetidos
+        Lista<int> dni;
 
         while (punteroTemp != nullptr) {
+
+			// Se crea un paciente temporal para almacenar los datos del paciente
             Paciente& tempPaciente = punteroTemp->dato;
 
-            cout << "DNI: " << tempPaciente.DNI << endl;
-            cout << "Nombre: " << tempPaciente.nombre << endl;
-            cout << "Apellido: " << tempPaciente.apellido << endl;
-			cout << "Edad: " << tempPaciente.edad << endl;
-            if (tempPaciente.Genero == 1)
+            if (!dni.buscarDNI2(tempPaciente.DNI))
             {
-                cout << "Masculino" << endl;
-            }
-            else
-            {
-                cout << "Femenino" << endl;
-            }
-            // No necesitas crear nuevas instancias de las pilas, puedes usar las pilas originales de cada paciente
-            Pila<string> pilaHistorial = tempPaciente.historial.copiar();
-            Pila<int> pilaDoctor = tempPaciente.Doctor.copiar();
-            cout << endl << endl;
-            while (!pilaDoctor.estaVacia()) {
-                cout << "El paciente vino al doctor: ";
-                switch (pilaDoctor.peek()) {
-                case 1:
-                    cout << "Cirujano" << endl;
-                    break;
-                case 2:
-                    cout << "Cardiologo" << endl;
-                    break;
-                case 3:
-                    cout << "Oftalmologo" << endl;
-                    break;
-                case 4:
-                    cout << "Traumatologo" << endl;
-                    break;
-                case 5:
-                    cout << "Odontologo" << endl;
-                    break;
-                case 6:
-                    cout << "Dentista" << endl;
-                    break;
-                case 7:
-                    cout << "Dermatologo" << endl;
-                    break; // Falta un break en este caso
-                default:
-                    cout << "Guardia" << endl;
-                    break;
+				// Se agrega el dni a la lista para no mostrar paciente de nuevo
+				dni.agregarAlInicio(tempPaciente.DNI);
+                cout << endl;
+
+				// Se muestran los datos del paciente
+                cout << "DNI: " << tempPaciente.DNI << endl;
+                cout << "Nombre: " << tempPaciente.nombre << endl;
+                cout << "Apellido: " << tempPaciente.apellido << endl;
+                cout << "Edad: " << tempPaciente.edad << endl;
+                if (tempPaciente.Genero == 1)
+                {
+                    cout << "Masculino" << endl;
                 }
-                cout << "Por el motivo: " << pilaHistorial.peek() << endl;
-                pilaDoctor.pop(); // Eliminar el elemento superior de la pila después de mostrarlo
-                pilaHistorial.pop(); // Eliminar el elemento superior de la pila después de mostrarlo
+                else
+                {
+                    cout << "Femenino" << endl;
+                }
+
+                // Se crean copias de las pilas del paciente 
+				// para no manipular las originales
+                Pila<string> pilaHistorial = tempPaciente.historial.copiar();
+                Pila<int> pilaDoctor = tempPaciente.Doctor.copiar();
+
+                int contador = 1;
+
+                while (!pilaDoctor.estaVacia()) {//revisa que la pila no este vacia
+                    cout << "Consulta " << contador <<  endl;
+                    cout << "El paciente vino al doctor: ";
+                    switch (pilaDoctor.peek()) {//segun el valor almacenado en la pila determina que caso mostrar
+                    case 1:
+                        cout << "Cirujano" << endl;
+                        break;
+                    case 2:
+                        cout << "Cardiologo" << endl;
+                        break;
+                    case 3:
+                        cout << "Oftalmologo" << endl;
+                        break;
+                    case 4:
+                        cout << "Traumatologo" << endl;
+                        break;
+                    case 5:
+                        cout << "Odontologo" << endl;
+                        break;
+                    case 6:
+                        cout << "Dentista" << endl;
+                        break;
+                    case 7:
+                        cout << "Dermatologo" << endl;
+                        break; 
+                    default:
+                        cout << "Guardia" << endl;
+                        break;
+                    }
+                    cout << "Por el motivo: " << pilaHistorial.peek() << endl;
+                    pilaDoctor.pop(); // Eliminar el elemento cima de la pila después de mostrarlo
+                    pilaHistorial.pop(); // Eliminar el elemento cima de la pila después de mostrarlo
+					contador++;//un contador para expresar el numero de consultas
+                }
+                
             }
-            punteroTemp = punteroTemp->siguiente; // Debes avanzar al siguiente nodo en cada iteración
+            cout << endl << endl;
+            punteroTemp = punteroTemp->siguiente; // Se avanzar al siguiente nodo en cada iteración
         }
-        cout << endl << endl;
     }
-        
+       
+	// Metodo para eliminar el primer nodo de la lista
 	void eliminarCabecera() {
 		if (cabeza != nullptr) {
-			Nodo* temp = cabeza;
+            //Puntero a primer nodo de la lista
+            Nodo* temp = cabeza;
 			cabeza = cabeza->siguiente;
-			delete temp;
+			delete temp;//elimino el anterior cabeza
 		}
 	}
 };
@@ -267,7 +314,7 @@ private:
     };
 
     Nodo* frente; // Puntero al primer nodo de la cola
-    Nodo* final;  // Puntero al ?ltimo nodo de la cola
+    Nodo* final;  // Puntero al ultimo nodo de la cola
 
 public:
     // Constructor de la cola
@@ -277,11 +324,11 @@ public:
     void enqueue(T dato) {
         Nodo* nuevoNodo = new Nodo(dato);
         if (final == nullptr) {
-            // Si la cola est? vac?a, frente y final apuntan al nuevo nodo
+            // Si la cola esta vacia, frente y final apuntan al nuevo nodo
             frente = final = nuevoNodo;
         }
         else {
-            // Si no est? vac?a, a?adir el nuevo nodo al final y actualizar el puntero final
+            // Si no esta vacia, añadir el nuevo nodo al final y actualizar el puntero final
             final->siguiente = nuevoNodo;
             final = nuevoNodo;
         }
@@ -292,25 +339,27 @@ public:
         if (frente == nullptr) {
             throw out_of_range("Intento de dequeue en cola vacia");
         }
+        // Puntero al primer nodo frente de la cola
         Nodo* temp = frente;
         T dato = frente->dato;
         frente = frente->siguiente;
 
         if (frente == nullptr) {
-            final = nullptr; // Si la cola qued? vac?a, ajustar el puntero final
+            final = nullptr; // Si la cola queda vacia, ajustar el puntero final
         }
 
         delete temp; // Liberar el nodo eliminado
         return dato; // Devolver el dato del nodo eliminado
     }
 
-    // Metodo para comprobar si la cola est? vac?a
+    // Metodo para comprobar si la cola esta vacia
     bool estaVacia() const {
         return frente == nullptr;
     }
 
     // Metodo para obtener DNI del paciente del frente de la cola 
     bool buscarDNI(int dniPaciente) {
+		// Puntero al primer nodo frente de la cola
         Nodo* actual = frente;
         while (actual != nullptr) {
             // Si encuentra el paciente con el DNI dado, devuelve su índice
@@ -328,11 +377,14 @@ public:
 
 // Funcion para ingresar un paciente a la cola de espera
 void ingresarPaciente(Lista<int>& listaVerificacion, Cola<int>& colaAtencion) {
+    
+	// El usuario ingresa DNI del paciente
     int dni = 0;
     cout << "Ingrese el dni del paciente" << endl;
 
     cin >> dni;
 
+	// Manejo de errores dni
     while (cin.fail() || dni < 1)
     {
         cin.clear();
@@ -341,13 +393,17 @@ void ingresarPaciente(Lista<int>& listaVerificacion, Cola<int>& colaAtencion) {
         cin >> dni;
     }
 
-
+    // Condicion para verificar si el dni ya tiene turno asignado
     if (listaVerificacion.verificarPaciente(dni))
     {
+		// Si ya tiene un turno, no puede registrarse de nuevo
         cout << "Usted ya tiene un turno asignado" << endl << endl;
     }
+    // Si no esta en la lista lo agrega a la cola de urgencias
     else
     {
+        // Si no tiene turno, se registra el turno 
+		// a la lista de verificacion y se agrega a la cola de atencion
         listaVerificacion.agregarAlInicio(dni);
         colaAtencion.enqueue(dni);
         cout << "Perfecto. Espera a ser llamado! " << endl << endl;
@@ -360,21 +416,26 @@ void atenderPaciente(Lista<int>& listaVerificacion, Lista<Paciente>& listaPacien
 
     // Se crea un paciente registrado
     Paciente nuevoPaciente;
+    int dni = 0;
 
     // Verificar si la cola de urgencias esta vacia
+    
     if (!colaPacientesUrgencias.estaVacia())
     {
         // Se obtiene el dni del paciente en la cola y lo eliminamos
-        int dni = colaPacientes.dequeue();
+        int dni = colaPacientesUrgencias.dequeue();
 
-        // Se crea una variable bool para analizar si el paciente ya ha sido registrado anteriormente
+        // Eliminamos dni de la lista de verificacion
+        listaVerificacion.eliminardni(dni);
+
         cout << "Atendiendo paciente con DNI: " << dni << endl;
 
+		// Creamos una variable bool para analizar si el paciente ya ha sido registrado anteriormente
         if (listaPacientes.buscarDNI(dni))
         {
             // Si el paciente ya ha sido registrado, se obtiene su informacion desde la listaPacientes
             nuevoPaciente = listaPacientes.buscarPaciente(dni);
-            
+
         }
         else
         {
@@ -399,6 +460,7 @@ void atenderPaciente(Lista<int>& listaVerificacion, Lista<Paciente>& listaPacien
 
             cout << "Ingrese 1 si su genero es Masculino y 2 si es Femenino: ";
             cin >> nuevoPaciente.Genero;
+
             //Manejo de errores nuevoPaciente.genero
             while (cin.fail() || (nuevoPaciente.Genero != 1 && nuevoPaciente.Genero != 2)) {
                 cin.clear();
@@ -406,57 +468,17 @@ void atenderPaciente(Lista<int>& listaVerificacion, Lista<Paciente>& listaPacien
                 cout << "Ingrese un genero valido (1 o 2) : ";
                 cin >> nuevoPaciente.Genero;
             }
-
-           
         }
-        // Se crea la variable num para averiguar a que doctor el paciente desea visitar
-        int num = 0;
-        cout << "Ingrese a que doctor viene a visitar: " << endl;
-        cout << "1. Cirujano" << endl;
-        cout << "2. Cardiologo" << endl;
-        cout << "3. Oftalmologo" << endl;
-        cout << "4. Traumatologo" << endl;
-        cout << "5. Odontologo" << endl;
-        cout << "6. Dentista " << endl;
-        cout << "7. Dermatologo" << endl;
-        cin >> num;
-
-        // Manejo de errores num
-        while (cin.fail() || (num < 1 || num > 7)) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Se ignora toda la entrada anterior hasta encontrar un salto de linea  
-            cout << "Ingrese un numero valido: ";
-            cin >> num;
-        }
-        
-        // Se le hace push a la pila Doctor
-        nuevoPaciente.Doctor.push(num);
-
-        // Se crea la variable motivo para saber el motivo de la consulta
-        string motivo = "";
-        cout << "Ingrese el motivo de la consulta" << endl;
-        cin.ignore();
-        getline(cin, motivo);
-
-        // Se le hace push a la pila historial
-        nuevoPaciente.historial.push(motivo);
-
-        // Eliminamos dni de la lista de verificacion
-        listaVerificacion.eliminarPaciente(dni);
-
-        // Se agrega el nuevo paciente a la lista de pacientes (para futuras consultas)
-        listaPacientes.agregarAlInicio(nuevoPaciente);
-
-        cout << "Paciente: " << nuevoPaciente.nombre << " " << nuevoPaciente.apellido << " atendido con exito. " << endl << endl;
-
-        return;
     }
-    // Si la cola de urgencia esta vacia se verifica si la cola de pacientes esta vacia
+    // Si la cola de urgencia esta vacia, se verifica si la cola de pacientes esta vacia
     else if (!colaPacientes.estaVacia())
     {
         // Se obtiene el dni del paciente en la cola y lo eliminamos
         int dni = colaPacientes.dequeue();
 
+        // Eliminamos dni de la lista de verificacion
+        listaVerificacion.eliminardni(dni);
+
         // Se crea una variable bool para analizar si el paciente ya ha sido registrado anteriormente
         cout << "Atendiendo paciente con DNI: " << dni << endl;
 
@@ -495,78 +517,81 @@ void atenderPaciente(Lista<int>& listaVerificacion, Lista<Paciente>& listaPacien
                 cout << "Ingrese un genero valido (1 o 2) : ";
                 cin >> nuevoPaciente.Genero;
             }
-
-            
         }
-        // Se crea la variable num para averiguar a que doctor el paciente desea visitar
-        int num = 0;
-        cout << "Ingrese a que doctor viene a visitar: " << endl;
-        cout << "1. Cirujano" << endl;
-        cout << "2. Cardiologo" << endl;
-        cout << "3. Oftalmologo" << endl;
-        cout << "4. Traumatologo" << endl;
-        cout << "5. Odontologo" << endl;
-        cout << "6. Dentista " << endl;
-        cout << "7. Dermatologo" << endl;
-        cout << "8. Guardia" << endl;
-        cin >> num;
-
-        // Manejo de errores num
-        while (cin.fail() || (num < 1 || num > 8)) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Se ignora toda la entrada anterior hasta encontrar un salto de linea  
-            cout << "Ingrese un numero valido: ";
-            cin >> num;
-        }
-
-        // Se le hace push a la pila Doctor
-        nuevoPaciente.Doctor.push(num);
-
-        // Se crea la variable motivo para saber el motivo de la consulta
-        string motivo = "";
-        cout << "Ingrese el motivo de la consulta" << endl;
-        cin.ignore();
-        getline(cin, motivo);
-
-        // Se le hace push a la pila historial
-        nuevoPaciente.historial.push(motivo);
-
-        // Eliminamos dni de la lista de verificacion
-        listaVerificacion.eliminarPaciente(dni);
-
-        // Se agrega el nuevo paciente a la lista de pacientes (para futuras consultas)
-        listaPacientes.agregarAlInicio(nuevoPaciente);
-
-        cout << "Paciente: " << nuevoPaciente.nombre << nuevoPaciente.apellido << " atendido con exito. " << endl << endl;
-        return;
     }
-    // Si no hay pacientes en ninguna cola 
+	// Si ambas colas estan vacias, se informa al usuario
     else
     {
         cout << "No hay pacientes en la fila." << endl << endl;
         return;
     }
+    // Se crea la variable num para averiguar a que doctor el paciente desea visitar
+    int num = 0;
+    cout << "Ingrese a que doctor viene a visitar: " << endl;
+    cout << "1. Cirujano" << endl;
+    cout << "2. Cardiologo" << endl;
+    cout << "3. Oftalmologo" << endl;
+    cout << "4. Traumatologo" << endl;
+    cout << "5. Odontologo" << endl;
+    cout << "6. Dentista " << endl;
+    cout << "7. Dermatologo" << endl;
+    cout << "8. Guardia" << endl;
+    cin >> num;
+
+    // Manejo de errores num
+    while (cin.fail() || (num < 1 || num > 8))
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Se ignora toda la entrada anterior hasta encontrar un salto de linea  
+        cout << "Ingrese un numero valido: ";
+        cin >> num;
+    }
+
+    // Se le hace push a la pila Doctor
+    nuevoPaciente.Doctor.push(num);
+
+    // Se crea la variable motivo para saber el motivo de la consulta
+    string motivo = "";
+    cout << "Ingrese el motivo de la consulta" << endl;
+    cin.ignore();
+    getline(cin, motivo);
+
+    // Se le hace push a la pila historial
+    nuevoPaciente.historial.push(motivo);
+
+    // Se agrega el nuevo paciente a la lista de pacientes (para futuras consultas)
+    listaPacientes.agregarAlInicio(nuevoPaciente);
+
+    cout << "Paciente: " << nuevoPaciente.nombre << " " << nuevoPaciente.apellido << " atendido con exito. " << endl << endl;
+    return;
 }
 
 // Funcion para agregar un paciente de urgencia a la cola de espera (con prioridad)
 void agregarPacienteDeUrgencia(Lista<int>& listaVerificacion, Cola<int>& colaPacientesUrgencias) {
     int dni = 0;
-    cout << "Ingrese el dni del paciente" << endl;
-    cin >> dni;
+    cout << "Ingrese el dni del paciente" << endl;//se solicita el dni y para poder añadirlo a la cola
 
+    cin >> dni;
     // Manejo de errores dni
     while (cin.fail() || dni < 1)
     {
         cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Se ignora toda la entrada anterior hasta encontrar un salto de linea  
+        cin.ignore(std::numeric_limits<streamsize>::max(), '\n'); // Se ignora toda la entrada anterior hasta encontrar un salto de linea  
         cout << "Ingrese un dni valido: ";
         cin >> dni;
     }
 
-    if (listaVerificacion.verificarPaciente(dni)) {
+    // Condicion para verificar si el dni ya tiene turno asignado
+    if (listaVerificacion.verificarPaciente(dni))
+    {
+        // Si ya tiene un turno, no puede registrarse de nuevo
         cout << "Usted ya tiene un turno asignado" << endl << endl;
     }
-    else {
+    // Si no esta en la lista lo agrega a la cola de urgencias
+    else
+    {
+        // Si no tiene turno, se registra el turno 
+        // a la lista de verificacion y se agrega a la cola de atencion
         listaVerificacion.agregarAlInicio(dni);
         colaPacientesUrgencias.enqueue(dni);
         cout << "Perfecto. Espera a ser llamado! " << endl << endl;
@@ -578,9 +603,7 @@ void agregarPacienteDeUrgencia(Lista<int>& listaVerificacion, Cola<int>& colaPac
 void revisarHistorial(Lista<Paciente> listaPacientes)
 {
 
-    int contador = 0;
-    string* vectorHistorial = new string[100];
-    int* vectorDoctor = new int[100];
+    int contador = 1;
     int dni = 0;
     cout << "Ingrese el DNI del paciente: ";
     cin >> dni;
@@ -594,7 +617,8 @@ void revisarHistorial(Lista<Paciente> listaPacientes)
         cin >> dni;
     }
 
-    if (listaPacientes.buscarDNI(dni)) {
+    if (listaPacientes.buscarDNI(dni)) {// busco que el dni en la lista
+        // si lo encuntra lo muestra
         Paciente& paciente = listaPacientes.buscarPaciente(dni);
         cout << "Datos del pacientes: " << endl;
         cout << "Nombre y apellido: " << paciente.nombre << " " << paciente.apellido << endl;
@@ -615,6 +639,7 @@ void revisarHistorial(Lista<Paciente> listaPacientes)
         
         // Mientras haya elementos en la pila de historial, mostramos los datos
         while (!pilaDoctorCopia.estaVacia()) {
+			cout << "Consulta " << contador << endl;
             cout << "El paciente vino al doctor: ";
             switch (pilaDoctorCopia.pop()) {
             case 1:
@@ -642,6 +667,7 @@ void revisarHistorial(Lista<Paciente> listaPacientes)
                 break;
             }
 			cout << "Por el motivo: " << pilaHistorialCopia.pop() << endl;
+			contador++;
         }
         cout << endl;
     }
@@ -653,21 +679,14 @@ void revisarHistorial(Lista<Paciente> listaPacientes)
     
 }
 
-//Funcion para mostrar todos los pacientes del dia
-void mostrarPacientesDia(Lista<Paciente>& listaPacientes){
-    listaPacientes.mostrarLista();
-}
-
 // Funcion prinpipal
 int main() {
+	// Se crean las estructuras de datos necesarias
     Lista<Paciente> listaPacientes;
     Lista<int> listaVerificacion;
 
     Cola<int> colaPacientes;
     Cola<int> colaPacientesUrgencias;
-
-	//string vectorHistorial[100];
-	//int vectorDoctor[100];
 
     //Menu de opciones 
     int select = 0;
@@ -681,6 +700,7 @@ int main() {
         cout << "6. Salir " << endl;
         cin >> select;
 
+		// Manejo de errores select
         while (cin.fail())
         {
             cin.clear();
@@ -703,9 +723,8 @@ int main() {
             revisarHistorial(listaPacientes);
             break;
         case 5:
-			mostrarPacientesDia(listaPacientes);
+            listaPacientes.mostrarLista();
             break;
-            //default del menu principal
         case 6:
             return 0;
             break;
